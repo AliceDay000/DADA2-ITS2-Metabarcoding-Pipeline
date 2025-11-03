@@ -1,0 +1,26 @@
+### Bash Script to run Cutadapt on filtered files - DADA2 pipeline
+
+eval "$(conda shell.bash hook)"
+FILTN_DIR=/mnt/c/Users/alice/Desktop/Documents/Raw_files_dada2_test/raw-reads-test-jiwon/filtN
+OUT_DIR=/mnt/c/Users/alice/Desktop/Documents/Raw_files_dada2_test/raw-reads-test-jiwon/cut
+FWD=GTGARTCATCGAATCTTTG
+REV=TCCTCCGCTTATTGATATGC
+FWD_RC=$(echo "$FWD" | rev | tr 'ATCG' 'TAGC')
+REV_RC=$(echo "$REV" | rev | tr 'ATCG' 'TAGC')
+
+
+for R1 in $FILTN_DIR/*_R1.fastq
+do
+	# Get the R2 filepath
+	R2=$(echo "$R1" | sed 's/_R1.fastq/_R2.fastq/g')
+	# Get filenames
+	R1_NAME=$( basename $R1 )
+	R2_NAME=$( basename $R2 )
+
+	# Run cutadapt (6 cores (-j), minimum length set to 1 (-m))
+	# Cutadapt version 4.9
+	conda activate cutadapt
+	cutadapt -j 6 -g $FWD -a $REV_RC -G $REV -A $FWD_RC -n 3 -m 1 -o $OUT_DIR/$R1_NAME -p $OUT_DIR/$R2_NAME $R1 $R2
+
+
+done 
